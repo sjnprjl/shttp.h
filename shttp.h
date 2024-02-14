@@ -1,7 +1,9 @@
 #ifndef SHTTP_H
 #define SHTTP_H
-
 #include "string.h"
+#include <stdint.h>
+#include <stdlib.h>
+
 #ifndef TRUE
 #define TRUE 1
 #endif // !TRUE
@@ -46,8 +48,6 @@
 #define IS_PCHAR(ch)                                                           \
   (IS_UNRESERVED((*ch)) || IS_PCT_ENCODED(ch) || IS_SUB_DELIMS((*ch)))
 
-#include <stdlib.h>
-
 typedef enum http_parse_status {
   h_ok,
   h_err,
@@ -73,6 +73,8 @@ typedef struct http_request {
   char *version;
 
   http_header_list *headers;
+
+  char *message_body;
 
   //
 } http_request;
@@ -272,7 +274,20 @@ int http_parse_req(http_parser *parser, http_request *req) {
                 "Expected end of line character LF for field-line");
       }
     }
-    return TRUE;
+    if (*(*parser->source)++ != CR) {
+      set_err(parser, h_err, "Expected end of line character CR after headers");
+      return FALSE;
+    }
+    if (*(*parser->source)++ != LF) {
+      set_err(parser, h_err, "Expected end of line character LF after headers");
+    }
+    // message-body
+    while (**parser->source != '\0') {
+      lex[lexi++] = *(*parser->source)++;
+    }
+    reset_lex();
+    req->message_body = strdup(lex);
+    //
   }
   return TRUE;
 };

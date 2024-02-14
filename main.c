@@ -1,18 +1,18 @@
 #include "shttp.h"
 #include "stdio.h"
 
-static char *request_header_msg = "GET /test?ab=1 HTTP/1.1\r\n\
-Host: localhost:3000\r\n\
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:121.0) Gecko/20100101 Firefox/121.0\r\n\
-Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8\r\n\
-Accept-Language: en-US,en;q=0.5\r\n\
-Accept-Encoding: gzip, deflate, br\r\n\
-Connection: keep-alive\r\n\
-Upgrade-Insecure-Requests: 1\r\n\
-Sec-Fetch-Dest: document\r\n\
-Sec-Fetch-Mode: navigate\r\n\
-Sec-Fetch-Site: none\r\n\
-Sec-Fetch-User: ?1\r\n";
+static char *request_header_msg = "\
+POST /api/endpoint HTTP/1.1\r\n\
+Host: example.com\r\n\
+Content-Type: application/json\r\n\
+Authorization: Bearer your_access_token\r\n\
+\r\n\
+{\
+  \"key1\": \"value1\",\
+  \"key2\": \"value2\",\
+  \"key3\": \"value3\"\
+}\
+";
 
 int main() {
 
@@ -34,6 +34,8 @@ int main() {
       printf("key[%s] => value[%s]\n", req.headers->data[i]->name,
              req.headers->data[i]->value);
     }
+
+    printf("Body: %s\n", req.message_body);
   }
 
   free_http_req(&req);
